@@ -16,12 +16,14 @@ const GlobalProvider = ({ children }) => {
   // Keep track of current user
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      console.log(user);
+
       setIsAuthenticated(!!user);
       setIsLoading(false);
-      (async () => {
-        if (user) {
+      if (user) {
+        (async () => {
           const docRef = doc(db, "users", user.uid);
-          let docSnap: DocumentData;
+          let docSnap: DocumentData | undefined = undefined;
           try {
             docSnap = await getDoc(docRef);
           } catch (error) {
@@ -31,8 +33,8 @@ const GlobalProvider = ({ children }) => {
           } else {
             console.error("ERROR: user document doesn't exist");
           }
-        }
-      })();
+        })();
+      }
     });
     setUnsubAuth(() => unsubscribeAuth);
     return () => {

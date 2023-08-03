@@ -1,16 +1,118 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import {
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useCallback, useLayoutEffect, useState } from "react";
+import {
+  Composer,
+  GiftedChat,
+  IMessage,
+  InputToolbar,
+  Send,
+} from "react-native-gifted-chat";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { addDoc, collection } from "firebase/firestore";
+import { auth, db } from "../../utils/firebase";
+import { colors } from "../../utils/colors";
+import { fonts } from "../../utils/fonts";
+import { FontAwesome5 } from "@expo/vector-icons";
+import CustomHeader from "../../components/atoms/CustomHeader";
 
-type Props = {};
+type Props = { isNew: boolean; chatID: string };
 
-const MessageChatScreen = (props: Props) => {
+const MessageChatScreen = ({ isNew, chatID }: Props) => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { title } = route.params;
+
+  console.log(auth.currentUser);
+
+  const [messages, setMessages] = useState<IMessage[]>([]);
+
+  const onSend = useCallback(async (messages = []) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages)
+    );
+    const { _id, createdAt, text, user } = messages[0];
+    let newChatID = chatID;
+    if (isNew) {
+      const newChatDocRef = await addDoc(collection(db, "messages"), {
+        title,
+        users: [],
+      });
+      newChatID = newChatDocRef.id;
+    }
+    addDoc(collection(collection(db, "messages"), newChatID), {
+      _id,
+      createdAt,
+      text,
+      user,
+    });
+  }, []);
+
   return (
-    <View>
-      <Text>MessageChatScreen</Text>
-    </View>
+    <SafeAreaView style={{ flex: 1, marginHorizontal: 10 }}>
+      <CustomHeader text={title} />
+      <GiftedChat
+        minComposerHeight={36}
+        maxComposerHeight={100}
+        keyboardShouldPersistTaps="never"
+        bottomOffset={35}
+        alwaysShowSend
+        messages={messages}
+        user={{
+          _id: auth.currentUser?.displayName,
+        }}
+        textInputStyle={[fonts.p, styles.textInput]}
+        placeholder="Message..."
+        onSend={(messages) => onSend(messages)}
+        renderAvatar={null}
+        renderInputToolbar={(props) => (
+          <InputToolbar {...props} containerStyle={styles.inputToolbar} />
+        )}
+        renderSend={(props) => (
+          <Send {...props}>
+            <View style={styles.sendIcon}>
+              <FontAwesome5 name="arrow-up" size={20} color="white" />
+            </View>
+          </Send>
+        )}
+      />
+    </SafeAreaView>
   );
 };
 
 export default MessageChatScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  textInput: {
+    padding: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
+    marginRight: 5,
+    marginLeft: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    backgroundColor: colors.lightGray,
+    borderRadius: 5,
+  },
+  inputToolbar: {
+    height: "auto", // Important
+    marginTop: 0,
+    borderTopWidth: 0,
+  },
+  sendIcon: {
+    // alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 30,
+    width: 30,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+    marginVertical: 3,
+  },
+});

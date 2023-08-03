@@ -12,7 +12,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import React, { ChangeEvent, useState } from "react";
 import CustomTextInput from "../../components/atoms/CustomTextInput";
 import { SIZES } from "../../utils/constants";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -24,7 +23,8 @@ import CustomText from "../../components/atoms/CustomText";
 import CustomButton, { ButtonType } from "../../components/atoms/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import CustomNestedDropdown from "../../components/atoms/CustomNestedDropdown";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../../utils/firebase";
 
 type Props = {};
 
@@ -35,7 +35,7 @@ type FormValueTypes = {
   price: number | undefined;
   size: SIZES | undefined;
   color: string;
-  categories: string;
+  category: string;
 };
 
 const FILENAME = "SellItem";
@@ -53,7 +53,9 @@ const SellItemScreen = (props: Props) => {
 
   const inputAccessoryViewID = "priceInput";
 
-  const handleSubmit = (values, resetForm, setErrors, setTouched) => {};
+  const handleSubmit = async (values, resetForm, setErrors, setTouched) => {
+    const docRef = await addDoc(collection(db, "items"), values);
+  };
 
   const handleAddImg = (
     images: string[],
@@ -109,7 +111,7 @@ const SellItemScreen = (props: Props) => {
               price: undefined,
               size: undefined,
               color: "",
-              categories: "",
+              category: "",
             } as FormValueTypes
           }
           // validationSchema={validationSchema}
@@ -188,16 +190,14 @@ const SellItemScreen = (props: Props) => {
                 />
                 <CustomButton
                   style={styles.categoryButton}
-                  text={
-                    values.categories === "" ? "Categories" : values.categories
-                  }
+                  text={values.category === "" ? "Categories" : values.category}
                   type={ButtonType.Input}
                   onPress={() =>
                     navigation.navigate("SelectCategory", {
-                      setCategory: handleChange("categories"),
+                      setCategory: handleChange("category"),
                     })
                   }
-                  placeholder={values.categories === ""}
+                  placeholder={values.category === ""}
                 />
               </ScrollView>
               <CustomButton

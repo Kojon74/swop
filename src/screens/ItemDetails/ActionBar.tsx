@@ -4,15 +4,20 @@ import CustomText from "../../components/atoms/CustomText";
 import { colors } from "../../utils/colors";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { fonts } from "../../utils/fonts";
+import { useNavigation } from "@react-navigation/native";
 
-type Props = { price: number };
+type Props = { price: number; title: string };
 
-const ActionBar = ({ price }: Props) => {
+const ActionBar = ({ price, title }: Props) => {
+  const navigation = useNavigation<any>();
   return (
     <View style={styles.container}>
       <CustomText style={[fonts.h1, styles.price]}>${price}</CustomText>
       <View style={styles.buttonCont}>
-        <TouchableOpacity style={[styles.button, styles.iconButton]}>
+        <TouchableOpacity
+          style={[styles.button, styles.iconButton]}
+          onPress={() => navigation.navigate("MessageChat", { title })}
+        >
           <FontAwesome5
             solid
             name="comment"

@@ -18,6 +18,7 @@ import AuthEmailScreen from "../screens/AuthEmail/AuthEmailScreen";
 import CameraScreen from "../screens/Camera/CameraScreen";
 import ReviewsScreen from "../screens/Reviews/ReviewsScreen";
 import SelectCategoryScreen from "../screens/SelectCategory/SelectCategoryScreen";
+import MessageChatScreen from "../screens/MessageChat/MessageChatScreen";
 
 const Tab = createBottomTabNavigator();
 const MainStack = createNativeStackNavigator();
@@ -61,6 +62,7 @@ const Navigation = () => {
           name="SelectCategory"
           component={SelectCategoryScreen}
         />
+        <MainStack.Screen name="MessageChat" component={MessageChatScreen} />
       </>
     );
 

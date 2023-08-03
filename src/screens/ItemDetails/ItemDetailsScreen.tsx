@@ -5,7 +5,6 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Carousel from "./Carousel";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { colors } from "../../utils/colors";
 import { fonts } from "../../utils/fonts";
 import CustomText from "../../components/atoms/CustomText";
 import ActionBar from "./ActionBar";
@@ -42,7 +41,7 @@ const ItemDetailsScreen = () => {
         <CustomText>Seller</CustomText>
         <CustomText></CustomText>
       </View>
-      <ActionBar price={price} />
+      <ActionBar price={price} title={title} />
     </SafeAreaView>
   );
 };
