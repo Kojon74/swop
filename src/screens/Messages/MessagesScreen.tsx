@@ -1,13 +1,21 @@
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, SafeAreaView, StyleSheet } from "react-native";
 import React from "react";
+import { useGlobalContext } from "../../context/GlobalContext";
+import MessagesRow from "./MessagesRow";
 
 type Props = {};
 
 const MessagesScreen = (props: Props) => {
+  const { messageChats } = useGlobalContext();
+  console.log(messageChats);
+
   return (
-    <View>
-      <Text>MessagesScreen</Text>
-    </View>
+    <SafeAreaView>
+      <FlatList
+        data={messageChats}
+        renderItem={({ item }) => <MessagesRow messageChatDetails={item} />}
+      />
+    </SafeAreaView>
   );
 };
 

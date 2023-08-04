@@ -17,7 +17,7 @@ import AuthScreen from "../screens/Auth/AuthScreen";
 import AuthEmailScreen from "../screens/AuthEmail/AuthEmailScreen";
 import CameraScreen from "../screens/Camera/CameraScreen";
 import ReviewsScreen from "../screens/Reviews/ReviewsScreen";
-import SelectCategoryScreen from "../screens/SelectCategory/SelectCategoryScreen";
+import SelectScreen from "../screens/Select/SelectScreen";
 import MessageChatScreen from "../screens/MessageChat/MessageChatScreen";
 
 const Tab = createBottomTabNavigator();
@@ -58,10 +58,7 @@ const Navigation = () => {
         <MainStack.Screen name="Tabs" component={BottomTabs} />
         <MainStack.Screen name="SellItem" component={SellItemScreen} />
         <MainStack.Screen name="Camera" component={CameraScreen} />
-        <MainStack.Screen
-          name="SelectCategory"
-          component={SelectCategoryScreen}
-        />
+        <MainStack.Screen name="Select" component={SelectScreen} />
         <MainStack.Screen name="MessageChat" component={MessageChatScreen} />
       </>
     );

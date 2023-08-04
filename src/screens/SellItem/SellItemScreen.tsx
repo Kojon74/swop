@@ -25,6 +25,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../utils/firebase";
+import CategoriesList from "./CategoriesList";
 
 type Props = {};
 
@@ -54,7 +55,8 @@ const SellItemScreen = (props: Props) => {
   const inputAccessoryViewID = "priceInput";
 
   const handleSubmit = async (values, resetForm, setErrors, setTouched) => {
-    const docRef = await addDoc(collection(db, "items"), values);
+    addDoc(collection(db, "items"), values);
+    navigation.navigate("ProfileStackNav");
   };
 
   const handleAddImg = (
@@ -193,11 +195,24 @@ const SellItemScreen = (props: Props) => {
                   text={values.category === "" ? "Categories" : values.category}
                   type={ButtonType.Input}
                   onPress={() =>
-                    navigation.navigate("SelectCategory", {
-                      setCategory: handleChange("category"),
+                    navigation.navigate("Select", {
+                      list: CategoriesList,
+                      setItem: handleChange("category"),
                     })
                   }
                   placeholder={values.category === ""}
+                />
+                <CustomButton
+                  style={styles.categoryButton}
+                  text={values.size === undefined ? "Size" : values.size}
+                  type={ButtonType.Input}
+                  onPress={() =>
+                    navigation.navigate("Select", {
+                      list: { S: "", M: "", L: "" },
+                      setItem: handleChange("size"),
+                    })
+                  }
+                  placeholder={values.size === undefined}
                 />
               </ScrollView>
               <CustomButton

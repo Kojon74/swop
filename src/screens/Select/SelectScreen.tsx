@@ -4,30 +4,27 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import CustomHeader from "../../components/atoms/CustomHeader";
-import CategoriesList from "../SellItem/CategoriesList";
-import { colors } from "../../utils/colors";
 import { fonts } from "../../utils/fonts";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 type Props = {};
 
-const SelectCategoryScreen = (props: Props) => {
+const SelectScreen = (props: Props) => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { setCategory } = route.params;
-  const [data, setData] = useState(CategoriesList);
+  const { list, setItem } = route.params;
+  const [data, setData] = useState(list);
 
   const handleSelectRow = (item: any) => {
     console.log(data[item]);
 
     if (data[item] !== "") setData((prev) => prev[item]);
     else {
-      setCategory(item);
+      setItem(item);
       navigation.goBack();
     }
   };
@@ -57,7 +54,7 @@ const CategoryRow = (data: any, item: any, handleSelectRow: any) => {
   );
 };
 
-export default SelectCategoryScreen;
+export default SelectScreen;
 
 const styles = StyleSheet.create({
   rowContainer: {

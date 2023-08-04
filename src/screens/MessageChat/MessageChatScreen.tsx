@@ -1,12 +1,5 @@
-import {
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import React, { useCallback, useLayoutEffect, useState } from "react";
+import { SafeAreaView, StyleSheet, View } from "react-native";
+import React, { useCallback, useState } from "react";
 import {
   Composer,
   GiftedChat,
@@ -14,20 +7,17 @@ import {
   InputToolbar,
   Send,
 } from "react-native-gifted-chat";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { addDoc, collection } from "firebase/firestore";
+import { useRoute } from "@react-navigation/native";
+import { addDoc, collection, doc } from "firebase/firestore";
 import { auth, db } from "../../utils/firebase";
 import { colors } from "../../utils/colors";
 import { fonts } from "../../utils/fonts";
 import { FontAwesome5 } from "@expo/vector-icons";
 import CustomHeader from "../../components/atoms/CustomHeader";
 
-type Props = { isNew: boolean; chatID: string };
-
-const MessageChatScreen = ({ isNew, chatID }: Props) => {
-  const navigation = useNavigation();
+const MessageChatScreen = () => {
   const route = useRoute();
-  const { title } = route.params;
+  const { chatID, isNew, title } = route.params;
 
   console.log(auth.currentUser);
 
@@ -39,14 +29,17 @@ const MessageChatScreen = ({ isNew, chatID }: Props) => {
     );
     const { _id, createdAt, text, user } = messages[0];
     let newChatID = chatID;
+    console.log(isNew);
+
     if (isNew) {
       const newChatDocRef = await addDoc(collection(db, "messages"), {
         title,
-        users: [],
+        buyer: auth.currentUser?.uid,
+        seller: "sellerID", // TODO
       });
       newChatID = newChatDocRef.id;
     }
-    addDoc(collection(collection(db, "messages"), newChatID), {
+    addDoc(collection(doc(collection(db, "messages"), newChatID), "chat"), {
       _id,
       createdAt,
       text,

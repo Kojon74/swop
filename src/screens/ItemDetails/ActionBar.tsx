@@ -5,18 +5,26 @@ import { colors } from "../../utils/colors";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { fonts } from "../../utils/fonts";
 import { useNavigation } from "@react-navigation/native";
+import { useGlobalContext } from "../../context/GlobalContext";
 
 type Props = { price: number; title: string };
 
 const ActionBar = ({ price, title }: Props) => {
   const navigation = useNavigation<any>();
+  const { messageChats } = useGlobalContext();
+
+  const handlePressChat = () => {
+    let isNewChat = true;
+    messageChats.some((chat) => chat.itemID.includes(itemID));
+    navigation.navigate("MessageChat", { title, isNew: true });
+  };
   return (
     <View style={styles.container}>
       <CustomText style={[fonts.h1, styles.price]}>${price}</CustomText>
       <View style={styles.buttonCont}>
         <TouchableOpacity
           style={[styles.button, styles.iconButton]}
-          onPress={() => navigation.navigate("MessageChat", { title })}
+          onPress={handlePressChat}
         >
           <FontAwesome5
             solid
