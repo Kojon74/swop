@@ -3,8 +3,6 @@ import { GlobalContextTypes as Types } from "./GlobalContextTypes";
 import { Unsubscribe, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../utils/firebase";
 import {
-  DocumentData,
-  QuerySnapshot,
   collection,
   doc,
   getDoc,
@@ -21,8 +19,13 @@ const GlobalProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [unsubAuth, setUnsubAuth] = useState<Unsubscribe>();
-  const [cameraPermission, setCameraPermission] = useState<boolean>();
+  const [cameraPermission, setCameraPermission] = useState<
+    boolean | undefined
+  >(); // Initialize undefined to differentiate between empty and uninitialized
   const [messageChats, setMessageChats] = useState<any[]>([]);
+  const [userListedItems, setUserListedItems] = useState<
+    string[] | undefined
+  >(); // Initialize undefined to differentiate between empty and uninitialized
 
   // Keep track of current user
   useEffect(() => {
@@ -32,13 +35,10 @@ const GlobalProvider = ({ children }) => {
       if (user) {
         (async () => {
           const docRef = doc(db, "users", user.uid);
-          let docSnap: DocumentData | undefined = undefined;
-          try {
-            docSnap = await getDoc(docRef);
-          } catch (error) {
-            console.error(`1 ${FILENAME}: ${error}`);
-          }
+          const docSnap = await getDoc(docRef);
           if (docSnap?.exists()) {
+            // Get all user listed items
+            setUserListedItems(docSnap.data().userListedItems);
           } else {
             console.error("ERROR: user document doesn't exist");
           }
@@ -52,6 +52,7 @@ const GlobalProvider = ({ children }) => {
   }, []);
 
   // Get all message chats the currentUser is involved in
+  // TODO: Change so each user keeps track on all messageChatIDs they are in
   useEffect(() => {
     if (!!auth.currentUser?.uid)
       (async () => {
@@ -92,7 +93,9 @@ const GlobalProvider = ({ children }) => {
         isAuthenticated,
         cameraPermission,
         messageChats,
+        userListedItems,
         setCameraPermission,
+        setUserListedItems,
       }}
     >
       {children}

@@ -7,7 +7,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ProfileScreen from "../screens/Profile/ProfileScreen";
 import MessagesScreen from "../screens/Messages/MessagesScreen";
-import SellItemScreen from "../screens/SellItem/SellItemScreen";
+import ListItemScreen from "../screens/ListItem/ListItemScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
@@ -56,7 +56,7 @@ const Navigation = () => {
     screens = (
       <>
         <MainStack.Screen name="Tabs" component={BottomTabs} />
-        <MainStack.Screen name="SellItem" component={SellItemScreen} />
+        <MainStack.Screen name="SellItem" component={ListItemScreen} />
         <MainStack.Screen name="Camera" component={CameraScreen} />
         <MainStack.Screen name="Select" component={SelectScreen} />
         <MainStack.Screen name="MessageChat" component={MessageChatScreen} />

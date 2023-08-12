@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -23,9 +22,16 @@ import CustomText from "../../components/atoms/CustomText";
 import CustomButton, { ButtonType } from "../../components/atoms/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../utils/firebase";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { auth, db } from "../../utils/firebase";
 import CategoriesList from "./CategoriesList";
+import { useGlobalContext } from "../../context/GlobalContext";
 
 type Props = {};
 
@@ -48,14 +54,20 @@ const validationSchema = Yup.object().shape({
   price: Yup.number().required(),
 });
 
-const SellItemScreen = (props: Props) => {
+const ListItemScreen = (props: Props) => {
   const navigation = useNavigation<any>();
   // const [images, setImages] = useState<string[]>([]);
+
+  const { setUserListedItems } = useGlobalContext();
 
   const inputAccessoryViewID = "priceInput";
 
   const handleSubmit = async (values, resetForm, setErrors, setTouched) => {
-    addDoc(collection(db, "items"), values);
+    const docID = (await addDoc(collection(db, "items"), values)).id;
+    updateDoc(doc(db, "users", auth.currentUser.uid), {
+      userListedItems: arrayUnion(docID),
+    });
+    setUserListedItems((prev) => [...prev, docID]);
     navigation.navigate("ProfileStackNav");
   };
 
@@ -236,7 +248,7 @@ const SellItemScreen = (props: Props) => {
   );
 };
 
-export default SellItemScreen;
+export default ListItemScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

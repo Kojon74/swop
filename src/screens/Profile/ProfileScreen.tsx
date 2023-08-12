@@ -3,15 +3,16 @@ import React from "react";
 import { userData } from "./UserData";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ItemsGallery from "../Discover/ItemsGallery";
-import { data } from "../../utils/data";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/atoms/CustomButton";
 import { fonts } from "../../utils/fonts";
+import { useGlobalContext } from "../../context/GlobalContext";
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { username, userItemsForSale, reviewsGiven, reviewsReceived } =
     userData;
+  const { userListedItems } = useGlobalContext();
 
   return (
     <SafeAreaView>
@@ -37,7 +38,7 @@ const ProfileScreen = () => {
         style={styles.addListingButton}
         onPress={() => navigation.navigate("SellItem")}
       />
-      <ItemsGallery items={data} />
+      <ItemsGallery items={userListedItems} />
     </SafeAreaView>
   );
 };

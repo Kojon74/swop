@@ -70,8 +70,10 @@ const useAuthEmail = () => {
           email,
           password
         );
+        // TODO: Put create new user doc in a seperate hook
         setDoc(doc(db, "users", cred.user.uid), {
           dateCreated: Timestamp.fromDate(new Date()),
+          userListedItems: [],
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
