@@ -27,19 +27,22 @@ import {
   arrayUnion,
   collection,
   doc,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { auth, db } from "../../utils/firebase";
+import { auth, db, storage } from "../../utils/firebase";
 import CategoriesList from "./CategoriesList";
 import { useGlobalContext } from "../../context/GlobalContext";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 type Props = {};
 
 type FormValueTypes = {
   images: string[];
+  brand: string;
   title: string;
   desc: string;
-  price: number | undefined;
+  price: string;
   size: SIZES | undefined;
   color: string;
   category: string;
@@ -73,17 +76,42 @@ const ListItemScreen = (props: Props) => {
       shouldValidate?: boolean | undefined
     ) => void
   ) => {
-    const docID = (
-      await addDoc(collection(db, "items"), {
-        ...values,
-        sellerID: auth.currentUser?.uid,
-        sellerUsername: auth.currentUser?.displayName,
+    const { images: localImageURIs, ...docValues } = values;
+    const newItemRef = doc(collection(db, "items"));
+    // Get remote images in format [[uri1, path1], [uri2, path2], ...], need to transpose
+    const remoteImages = await Promise.all(
+      localImageURIs.map(async (localImageURI) => {
+        const remoteImagePath = `${auth.currentUser?.uid}/${
+          newItemRef.id
+        }/${localImageURI.split("/").slice(-1)}`;
+        const storageRef = ref(storage, remoteImagePath);
+        await uploadBytes(
+          storageRef,
+          await (await fetch(localImageURI)).blob()
+        );
+        return [await getDownloadURL(storageRef), remoteImagePath];
       })
-    ).id;
-    updateDoc(doc(db, "users", auth.currentUser.uid), {
-      userListedItems: arrayUnion(docID),
+    );
+    // Transpose the array to separate uris and paths
+    const [remoteImageURIs, remoteImagePaths] = remoteImages[0].map(
+      (_, colIndex) => remoteImages.map((row) => row[colIndex])
+    );
+    await setDoc(newItemRef, {
+      ...docValues,
+      datePosted: new Date(),
+      imagePaths: remoteImagePaths,
+      imageURIs: remoteImageURIs,
+      price: parseInt(docValues.price),
+      sellerID: auth.currentUser?.uid,
+      sellerUsername: auth.currentUser?.displayName,
     });
-    setUserListedItems((prev) => [...prev, docID]);
+    updateDoc(doc(db, "users", auth.currentUser.uid), {
+      userListedItems: arrayUnion(newItemRef.id),
+    });
+    setUserListedItems((prev: string[] | undefined) => [
+      ...prev,
+      newItemRef.id,
+    ]);
     navigation.navigate("ProfileStackNav");
   };
 
@@ -136,9 +164,10 @@ const ListItemScreen = (props: Props) => {
           initialValues={
             {
               images: [],
+              brand: "",
               title: "",
               desc: "",
-              price: undefined,
+              price: "",
               size: undefined,
               color: "",
               category: "",
@@ -198,6 +227,12 @@ const ListItemScreen = (props: Props) => {
                     </TouchableOpacity>
                   </View>
                 )}
+                {/* TODO: Change this to Searchable Dropdown */}
+                <CustomTextInput
+                  placeholder="Brand"
+                  value={values.brand}
+                  onChangeText={handleChange("brand")}
+                />
                 <CustomTextInput
                   placeholder="Item name"
                   value={values.title}

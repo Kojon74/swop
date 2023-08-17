@@ -7,21 +7,11 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { SIZES } from "../../utils/constants";
 import { useNavigation } from "@react-navigation/native";
+import { ItemType } from "./ItemsGallery";
 
 type Props = {
-  item: {
-    title: string;
-    brand: string;
-    desc: string;
-    price: number;
-    size: SIZES;
-    color: string;
-    images: string[];
-    sellerID: string;
-    datePosted: Date;
-  };
+  item: ItemType;
 };
 
 const WINDOW_WIDTH = Dimensions.get("window").width;
@@ -29,22 +19,26 @@ const WINDOW_WIDTH = Dimensions.get("window").width;
 const GalleryItem = ({ item }: Props) => {
   const navigation = useNavigation<any>();
   const {
-    title,
     brand,
-    desc,
-    price,
-    size,
+    category,
     color,
-    images,
-    sellerID,
     datePosted,
+    desc,
+    imagePaths,
+    imageURIs,
+    price,
+    sellerID,
+    sellerUsername,
+    size,
+    title,
+    id,
   } = item;
   return (
     <TouchableOpacity
       onPress={() => navigation.navigate("ItemDetails", { ...item })}
       style={styles.container}
     >
-      <Image source={{ uri: images[0] }} style={styles.image} />
+      <Image source={{ uri: imageURIs[0] }} style={styles.image} />
       <View style={styles.desc}>
         <View style={styles.firstRowDesc}>
           <Text>${price}</Text>

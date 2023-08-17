@@ -12,15 +12,18 @@ import {
 import { db } from "../../utils/firebase";
 
 type ItemType = {
-  title: string;
   brand: string;
-  desc: string;
-  price: number;
-  size: SIZES;
+  category: string;
   color: string;
-  images: string[];
-  sellerID: string;
   datePosted: Date;
+  desc: string;
+  imagePaths: string[];
+  imageURIs: string[];
+  price: number;
+  sellerID: string;
+  sellerUsername: string;
+  size: SIZES;
+  title: string;
   id: string;
 };
 
@@ -57,6 +60,8 @@ const ItemsGallery = ({ items }: Props) => {
     </View>
   );
 };
+
+export { ItemType };
 
 export default ItemsGallery;
 
