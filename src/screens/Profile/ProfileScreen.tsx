@@ -1,17 +1,15 @@
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import { userData } from "./UserData";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ItemsGallery from "../Discover/ItemsGallery";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "../../components/atoms/CustomButton";
 import { fonts } from "../../utils/fonts";
 import { useGlobalContext } from "../../context/GlobalContext";
+import { auth } from "../../utils/firebase";
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>();
-  const { username, userItemsForSale, reviewsGiven, reviewsReceived } =
-    userData;
   const { userListedItems } = useGlobalContext();
 
   return (
@@ -22,7 +20,9 @@ const ProfileScreen = () => {
       >
         <FontAwesome5 solid name="cog" size={24} />
       </TouchableOpacity>
-      <Text style={[fonts.h1, styles.username]}>@{username}</Text>
+      <Text style={[fonts.h1, styles.username]}>
+        @{auth.currentUser?.displayName}
+      </Text>
       <TouchableOpacity
         onPress={() => navigation.navigate("Reviews")}
         style={styles.starsCont}

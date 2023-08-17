@@ -14,7 +14,7 @@ import {
 import CustomTextInput from "../../components/atoms/CustomTextInput";
 import { SIZES } from "../../utils/constants";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Formik, FormikErrors } from "formik";
+import { Formik, FormikErrors, FormikState, FormikTouched } from "formik";
 import * as Yup from "yup";
 import CustomHeader from "../../components/atoms/CustomHeader";
 import { colors } from "../../utils/colors";
@@ -62,11 +62,22 @@ const ListItemScreen = (props: Props) => {
 
   const inputAccessoryViewID = "priceInput";
 
-  const handleSubmit = async (values, resetForm, setErrors, setTouched) => {
+  const handleSubmit = async (
+    values: FormValueTypes,
+    resetForm: (
+      nextState?: Partial<FormikState<FormValueTypes>> | undefined
+    ) => void,
+    setErrors: (errors: FormikErrors<FormValueTypes>) => void,
+    setTouched: (
+      touched: FormikTouched<FormValueTypes>,
+      shouldValidate?: boolean | undefined
+    ) => void
+  ) => {
     const docID = (
       await addDoc(collection(db, "items"), {
         ...values,
         sellerID: auth.currentUser?.uid,
+        sellerUsername: auth.currentUser?.displayName,
       })
     ).id;
     updateDoc(doc(db, "users", auth.currentUser.uid), {

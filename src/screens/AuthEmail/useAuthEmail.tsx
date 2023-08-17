@@ -3,8 +3,17 @@ import {
   createUserWithEmailAndPassword,
   fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
-import { doc, setDoc, Timestamp } from "@firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "@firebase/firestore";
 import {
   FormikErrors,
   FormikProps,
@@ -75,9 +84,11 @@ const useAuthEmail = () => {
   // Sign up with email
   const signUp = async ({
     email,
+    username,
     password,
   }: {
     email: string;
+    username?: string;
     password: string;
   }) => {
     try {
@@ -91,7 +102,9 @@ const useAuthEmail = () => {
         setDoc(doc(db, "users", cred.user.uid), {
           dateCreated: Timestamp.fromDate(new Date()),
           userListedItems: [],
+          username,
         });
+        updateProfile(cred.user, { displayName: username });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         setFirebaseError({ code: "", message: "" });
@@ -109,6 +122,25 @@ const useAuthEmail = () => {
     } catch (error) {
       console.error(`${FILENAME}: ${error}`);
     }
+  };
+
+  const handleSubmitUsername = async (
+    username: string,
+    setErrors: (errors: FormikErrors<FormValuesType>) => void,
+    setTouched: (
+      touched: FormikTouched<FormValuesType>,
+      shouldValidate?: boolean | undefined
+    ) => void
+  ) => {
+    const usernameExists =
+      (
+        await getDocs(
+          query(collection(db, "users"), where("username", "==", username))
+        )
+      ).size > 0;
+    if (usernameExists)
+      setError("username", "Username is taken", setErrors, setTouched);
+    else refPassword.current?.focus();
   };
 
   const handleSubmitSignIn = async (
@@ -182,6 +214,7 @@ const useAuthEmail = () => {
     validationSchema,
     clearError,
     handleSubmitEmail,
+    handleSubmitUsername,
     handleSubmitSignIn,
     setError,
     setIsNewUser,

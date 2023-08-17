@@ -27,6 +27,7 @@ const AuthEmailScreen = () => {
     validationSchema,
     clearError,
     handleSubmitEmail,
+    handleSubmitUsername,
     handleSubmitSignIn,
     setError,
   } = useAuthEmail();
@@ -48,7 +49,7 @@ const AuthEmailScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={{ flex: 1 }}>
-        <CustomHeader text="Enter Email" />
+        <CustomHeader text="Continue with email" />
         <SafeAreaView style={styles.container}>
           <Formik
             initialValues={{
@@ -98,13 +99,21 @@ const AuthEmailScreen = () => {
                     })
                   }
                 />
-                <Text style={styles.passwordLabel1}>{passwordHeader[0]}</Text>
-                <Text style={styles.passwordLabel2}>{passwordHeader[1]}</Text>
+                {isNewUser !== -1 && (
+                  <>
+                    <Text style={styles.passwordLabel1}>
+                      {passwordHeader[0]}
+                    </Text>
+                    <Text style={styles.passwordLabel2}>
+                      {passwordHeader[1]}
+                    </Text>
+                  </>
+                )}
                 {isNewUser === true && (
                   <CustomTextInput
                     autoFocus
                     errorMessage={errors.username}
-                    icon="lock"
+                    icon="user"
                     placeholder="Username"
                     touched={touched.username}
                     value={values.username}
@@ -112,7 +121,13 @@ const AuthEmailScreen = () => {
                     onFocus={() =>
                       clearError("username", setErrors, setTouched)
                     }
-                    onSubmitEditing={() => refPassword.current?.focus()}
+                    onSubmitEditing={() =>
+                      handleSubmitUsername(
+                        values.username,
+                        setErrors,
+                        setTouched
+                      )
+                    }
                   />
                 )}
                 {isNewUser !== -1 && (
