@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import CustomTextInput from "../../components/atoms/CustomTextInput";
 import CustomButton from "../../components/atoms/CustomButton";
-import useAuthEmail from "./useAuthEmail";
+import useAuthEmail, { FormValuesType } from "./useAuthEmail";
 import CustomHeader from "../../components/atoms/CustomHeader";
 import { Formik } from "formik";
 import { colors } from "../../utils/colors";
@@ -22,6 +22,7 @@ const AuthEmailScreen = () => {
     firebaseError,
     isNewUser,
     navigation,
+    refPassword,
     refConfirmPassword,
     validationSchema,
     clearError,
@@ -50,15 +51,16 @@ const AuthEmailScreen = () => {
         <CustomHeader text="Enter Email" />
         <SafeAreaView style={styles.container}>
           <Formik
-            initialValues={{ email: "", password: "", confirmPassword: "" }}
+            initialValues={{
+              email: "",
+              username: "",
+              password: "",
+              confirmPassword: "",
+            }}
             validationSchema={validationSchema}
             onSubmit={(values, { resetForm, setErrors, setTouched }) =>
               handleSubmitSignIn(
-                values as {
-                  email: string;
-                  password: string;
-                  confirmPassword?: string;
-                },
+                values as FormValuesType,
                 resetForm,
                 setErrors,
                 setTouched
@@ -90,7 +92,7 @@ const AuthEmailScreen = () => {
                     validateForm().then((err) => {
                       if (!Object.keys(err).includes("email"))
                         handleSubmitEmail(values.email);
-                      else {
+                      else if (err.email) {
                         setError("email", err.email, setErrors, setTouched);
                       }
                     })
@@ -98,13 +100,29 @@ const AuthEmailScreen = () => {
                 />
                 <Text style={styles.passwordLabel1}>{passwordHeader[0]}</Text>
                 <Text style={styles.passwordLabel2}>{passwordHeader[1]}</Text>
-                {isNewUser !== -1 && (
+                {isNewUser === true && (
                   <CustomTextInput
                     autoFocus
+                    errorMessage={errors.username}
+                    icon="lock"
+                    placeholder="Username"
+                    touched={touched.username}
+                    value={values.username}
+                    onChangeText={handleChange("username")}
+                    onFocus={() =>
+                      clearError("username", setErrors, setTouched)
+                    }
+                    onSubmitEditing={() => refPassword.current?.focus()}
+                  />
+                )}
+                {isNewUser !== -1 && (
+                  <CustomTextInput
+                    autoFocus={!(isNewUser as boolean)}
                     errorMessage={errors.password}
                     icon="lock"
                     isPass
                     placeholder="Password"
+                    refValue={refPassword}
                     touched={touched.password}
                     value={values.password}
                     onChangeText={handleChange("password")}
@@ -113,7 +131,7 @@ const AuthEmailScreen = () => {
                     }
                     onSubmitEditing={() =>
                       isNewUser
-                        ? refConfirmPassword.current.focus()
+                        ? refConfirmPassword.current?.focus()
                         : handleSubmit()
                     }
                   />
@@ -147,7 +165,7 @@ const AuthEmailScreen = () => {
                     : firebaseError.message}
                 </Text>
                 <CustomButton
-                  style={firebaseError.code && styles.buttonError}
+                  style={!!firebaseError.code && styles.buttonError}
                   text={"Sign in"}
                   onPress={() => handleSubmit()}
                 />

@@ -9,15 +9,31 @@ import React from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { colors } from "../../utils/colors";
 import { fonts } from "../../utils/fonts";
+import { useGlobalContext } from "../../context/GlobalContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../utils/firebase";
 
 type Props = {};
 
 const SettingsScreen = (props: Props) => {
+  const { clearState, setIsAuthenticated, unsubMessages } = useGlobalContext();
+
+  const handleSignOut = async () => {
+    unsubMessages();
+    try {
+      await signOut(auth);
+      setIsAuthenticated(false);
+      clearState();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const settingsItems = [
     {
       title: "Sign out",
       icon: "sign-out-alt",
-      onPress: () => {},
+      onPress: handleSignOut,
       destructive: true,
     },
     {
@@ -27,6 +43,7 @@ const SettingsScreen = (props: Props) => {
       destructive: true,
     },
   ];
+
   return (
     <SafeAreaView>
       <FlatList

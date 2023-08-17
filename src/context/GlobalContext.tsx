@@ -1,12 +1,21 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { GlobalContextTypes as Types } from "./GlobalContextTypes";
-import { Unsubscribe, onAuthStateChanged } from "firebase/auth";
+import {
+  Unsubscribe as UnsubscribeAuth,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { auth, db } from "../utils/firebase";
 import {
+  Unsubscribe as UnsubscribeFirestore,
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   or,
   query,
@@ -14,12 +23,14 @@ import {
 } from "firebase/firestore";
 
 const FILENAME = "GlobalContext";
-const GlobalContext = createContext<Types>(null);
+const GlobalContext = createContext<Types>(undefined);
 
-const GlobalProvider = ({ children }) => {
+const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [unsubAuth, setUnsubAuth] = useState<Unsubscribe>();
+  const [unsubMessages, setUnsubMessages] = useState<UnsubscribeFirestore>(
+    undefined as unknown as UnsubscribeFirestore
+  );
   const [cameraPermission, setCameraPermission] = useState<
     boolean | undefined
   >(); // Initialize undefined to differentiate between empty and uninitialized
@@ -46,7 +57,6 @@ const GlobalProvider = ({ children }) => {
         })();
       }
     });
-    setUnsubAuth(() => unsubscribeAuth);
     return () => {
       unsubscribeAuth();
     };
@@ -55,7 +65,7 @@ const GlobalProvider = ({ children }) => {
   // Get all message chats the currentUser is involved in
   // TODO: Change so each user keeps track on all messageChatIDs they are in
   useEffect(() => {
-    let unsubscribe: Unsubscribe | undefined;
+    let unsubscribe: UnsubscribeFirestore | undefined;
     if (!!auth.currentUser?.uid)
       (async () => {
         const messageChatsQuery = query(
@@ -88,8 +98,16 @@ const GlobalProvider = ({ children }) => {
           )
         );
       })();
+    setUnsubMessages(() => unsubscribe);
     return unsubscribe;
   }, [auth.currentUser?.uid]);
+
+  const clearState = () => {
+    setUnsubMessages(undefined as unknown as UnsubscribeFirestore);
+    setCameraPermission(undefined);
+    setMessageChats([]);
+    setUserListedItems(undefined);
+  };
 
   return (
     <GlobalContext.Provider
@@ -99,8 +117,11 @@ const GlobalProvider = ({ children }) => {
         cameraPermission,
         messageChats,
         userListedItems,
+        clearState,
         setCameraPermission,
+        setIsAuthenticated,
         setUserListedItems,
+        unsubMessages,
       }}
     >
       {children}

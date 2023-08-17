@@ -5,12 +5,27 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, setDoc, Timestamp } from "@firebase/firestore";
-import { FormikErrors, FormikProps, FormikTouched, FormikValues } from "formik";
+import {
+  FormikErrors,
+  FormikProps,
+  FormikState,
+  FormikTouched,
+  FormikValues,
+} from "formik";
 import * as Yup from "yup";
 import { auth, db } from "../../utils/firebase";
 import { useNavigation } from "@react-navigation/native";
+import { FirebaseError } from "firebase/app";
+import { TextInput } from "react-native";
 
 const FILENAME = "useAuthEmail";
+
+type FormValuesType = {
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+};
 
 const EmailSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -23,6 +38,9 @@ const SignInSchema = Yup.object().shape({
 
 const SignUpSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
+  username: Yup.string()
+    .min(4, "Must be 4 characters or more")
+    .required("Required"),
   password: Yup.string()
     .min(6, "Must be 6 characters or more")
     .required("Required"),
@@ -31,7 +49,7 @@ const SignUpSchema = Yup.object().shape({
     .required("Required"),
 });
 
-const errorCodes = {
+const errorCodes: { [key: string]: string } = {
   "auth/invalid-email": "Invalid email",
   "auth/wrong-password": "Wrong password",
   "auth/too-many-requests":
@@ -45,9 +63,8 @@ const useAuthEmail = () => {
   const [validationSchema, setValidationSchema] = useState(EmailSchema);
 
   const refForm = useRef<FormikProps<FormikValues>>(null);
-  const refEmail = useRef(null);
-  const refPassword = useRef(null);
-  const refConfirmPassword = useRef(null);
+  const refPassword = useRef<TextInput>(null);
+  const refConfirmPassword = useRef<TextInput>(null);
 
   useEffect(() => {
     if (isNewUser === -1) setValidationSchema(EmailSchema);
@@ -95,53 +112,45 @@ const useAuthEmail = () => {
   };
 
   const handleSubmitSignIn = async (
-    values: {
-      email: string;
-      password: string;
-      confirmPassword?: string;
-    },
-    resetForm: any,
-    setErrors,
-    setTouched
+    values: FormValuesType,
+    resetForm: (
+      nextState?: Partial<FormikState<FormValuesType>> | undefined
+    ) => void,
+    setErrors: (errors: FormikErrors<FormValuesType>) => void,
+    setTouched: (
+      touched: FormikTouched<FormValuesType>,
+      shouldValidate?: boolean | undefined
+    ) => void
   ) => {
     try {
       await signUp(values);
       resetForm();
     } catch (error) {
-      switch (error.code) {
-        case "auth/invalid-email":
-          // should never be executed since we check for this with formik, and new emails create new account
-          setError("email", errorCodes[error.code], setErrors, setTouched);
-          console.error("'auth/invalid-email error' should not be called");
-          break;
-        case "auth/wrong-password":
-          setError("password", errorCodes[error.code], setErrors, setTouched);
-          break;
-        case "auth/too-many-requests":
-          setError("password", errorCodes[error.code], setErrors, setTouched);
-          break;
-        default:
-          setFirebaseError(error);
-          break;
-      }
+      if (error instanceof FirebaseError)
+        switch (error.code) {
+          case "auth/invalid-email":
+            // should never be executed since we check for this with formik, and new emails create new account
+            setError("email", errorCodes[error.code], setErrors, setTouched);
+            console.error("'auth/invalid-email error' should not be called");
+            break;
+          case "auth/wrong-password":
+            setError("password", errorCodes[error.code], setErrors, setTouched);
+            break;
+          case "auth/too-many-requests":
+            setError("password", errorCodes[error.code], setErrors, setTouched);
+            break;
+          default:
+            setFirebaseError(error);
+            break;
+        }
     }
   };
 
   const clearError = (
     field: string,
-    setErrors: (
-      errors: FormikErrors<{
-        email: string;
-        password: string;
-        confirmPassword: string;
-      }>
-    ) => void,
+    setErrors: (errors: FormikErrors<FormValuesType>) => void,
     setTouched: (
-      touched: FormikTouched<{
-        email: string;
-        password: string;
-        confirmPassword: string;
-      }>,
+      touched: FormikTouched<FormValuesType>,
       shouldValidate?: boolean | undefined
     ) => void
   ) => {
@@ -149,7 +158,15 @@ const useAuthEmail = () => {
     setTouched({ [field]: false });
   };
 
-  const setError = (field, errorMessage, setErrors, setTouched) => {
+  const setError = (
+    field: string,
+    errorMessage: string,
+    setErrors: (errors: FormikErrors<FormValuesType>) => void,
+    setTouched: (
+      touched: FormikTouched<FormValuesType>,
+      shouldValidate?: boolean | undefined
+    ) => void
+  ) => {
     setErrors({ [field]: errorMessage });
     setTouched({ [field]: true });
   };
@@ -160,7 +177,6 @@ const useAuthEmail = () => {
     isNewUser,
     navigation,
     refConfirmPassword,
-    refEmail,
     refForm,
     refPassword,
     validationSchema,
@@ -171,5 +187,7 @@ const useAuthEmail = () => {
     setIsNewUser,
   };
 };
+
+export { FormValuesType };
 
 export default useAuthEmail;
