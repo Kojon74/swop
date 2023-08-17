@@ -29,8 +29,8 @@ const ProfileScreen = () => {
       >
         {Array(5)
           .fill(0)
-          .map(() => (
-            <FontAwesome5 solid name="star" size={20} />
+          .map((_, i) => (
+            <FontAwesome5 solid name="star" size={20} key={i} />
           ))}
       </TouchableOpacity>
       <CustomButton

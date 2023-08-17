@@ -18,12 +18,14 @@ type itemType = {
   size: SIZES;
   color: string;
   images: string[];
+  id: string;
+  sellerID: string;
 };
 
 const ItemDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation<any>();
-  const { title, brand, desc, price, size, color, images } =
+  const { title, brand, desc, price, size, color, images, id, sellerID } =
     route.params as itemType;
 
   const [liked, setLiked] = useState<boolean>(false);
@@ -38,10 +40,9 @@ const ItemDetailsScreen = () => {
         <CustomText style={fonts.h1}>{title}</CustomText>
         <CustomText>Size: {size}</CustomText>
         <CustomText>{desc}</CustomText>
-        <CustomText>Seller</CustomText>
-        <CustomText></CustomText>
+        <CustomText>{sellerID}</CustomText>
       </View>
-      <ActionBar price={price} title={title} />
+      <ActionBar price={price} title={title} itemID={id} sellerID={sellerID} />
     </SafeAreaView>
   );
 };

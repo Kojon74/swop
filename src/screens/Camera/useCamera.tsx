@@ -73,9 +73,6 @@ const useCamera = () => {
   };
 
   const handleUsePicture = () => {
-    console.log(images);
-    console.log([...images, tempImage]);
-
     setImages("images", [...images, tempImage]);
     navigation.navigate("SellItem");
   };

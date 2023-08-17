@@ -7,16 +7,15 @@ import { fonts } from "../../utils/fonts";
 import { useNavigation } from "@react-navigation/native";
 import { useGlobalContext } from "../../context/GlobalContext";
 
-type Props = { price: number; title: string };
+type Props = { price: number; title: string; itemID: string; sellerID: string };
 
-const ActionBar = ({ price, title }: Props) => {
+const ActionBar = ({ price, title, itemID, sellerID }: Props) => {
   const navigation = useNavigation<any>();
   const { messageChats } = useGlobalContext();
 
   const handlePressChat = () => {
-    let isNewChat = true;
-    messageChats.some((chat) => chat.itemID.includes(itemID));
-    navigation.navigate("MessageChat", { title, isNew: true });
+    const isNew = !messageChats.includes(itemID);
+    navigation.navigate("MessageChat", { title, isNew, sellerID });
   };
   return (
     <View style={styles.container}>

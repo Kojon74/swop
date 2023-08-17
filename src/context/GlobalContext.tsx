@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   or,
   query,
   where,
@@ -54,36 +55,40 @@ const GlobalProvider = ({ children }) => {
   // Get all message chats the currentUser is involved in
   // TODO: Change so each user keeps track on all messageChatIDs they are in
   useEffect(() => {
+    let unsubscribe: Unsubscribe | undefined;
     if (!!auth.currentUser?.uid)
       (async () => {
-        const messageChatsQuerySnap = await getDocs(
-          query(
-            collection(db, "messages"),
-            or(
-              where("buyer", "array-contains", auth.currentUser?.uid),
-              where("seller", "array-contains", auth.currentUser?.uid)
-            )
+        const messageChatsQuery = query(
+          collection(db, "messages"),
+          or(
+            where("buyer", "array-contains", auth.currentUser?.uid),
+            where("seller", "array-contains", auth.currentUser?.uid)
           )
         );
-        let tempMessageChats: any[] = [];
-        messageChatsQuerySnap.forEach((messageChatDoc) => {
-          let type; // buy, sell, trade
-          if (
-            messageChatDoc.data().buyer.includes(auth.currentUser?.uid) &&
-            messageChatDoc.data().seller.includes(auth.currentUser?.uid)
+        unsubscribe = onSnapshot(messageChatsQuery, (messageChatsQuerySnap) =>
+          setMessageChats(
+            messageChatsQuerySnap.docs.map((messageChatDoc) => {
+              let type; // buy, sell, trade
+              if (
+                messageChatDoc.data().buyer.includes(auth.currentUser?.uid) &&
+                messageChatDoc.data().seller.includes(auth.currentUser?.uid)
+              )
+                type = "trade";
+              else if (
+                messageChatDoc.data().buyer.includes(auth.currentUser?.uid)
+              )
+                type = "buy";
+              else type = "sell";
+              return {
+                id: messageChatDoc.id,
+                type,
+                ...messageChatDoc.data(),
+              };
+            })
           )
-            type = "trade";
-          else if (messageChatDoc.data().buyer.includes(auth.currentUser?.uid))
-            type = "buy";
-          else type = "sell";
-          tempMessageChats.push({
-            id: messageChatDoc.id,
-            type,
-            ...messageChatDoc.data(),
-          });
-        });
-        setMessageChats(tempMessageChats);
+        );
       })();
+    return unsubscribe;
   }, [auth.currentUser?.uid]);
 
   return (

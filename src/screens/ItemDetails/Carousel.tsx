@@ -24,7 +24,6 @@ const Carousel = ({ data, liked, setLiked }: Props) => {
 
   const onSingleTapEvent = (event: any) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      console.log("single tap 1");
     }
   };
 

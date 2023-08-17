@@ -1,27 +1,51 @@
 import { SafeAreaView, StyleSheet, View } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Composer,
   GiftedChat,
   IMessage,
   InputToolbar,
   Send,
 } from "react-native-gifted-chat";
 import { useRoute } from "@react-navigation/native";
-import { addDoc, collection, doc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  limit,
+  query,
+} from "firebase/firestore";
 import { auth, db } from "../../utils/firebase";
 import { colors } from "../../utils/colors";
 import { fonts } from "../../utils/fonts";
 import { FontAwesome5 } from "@expo/vector-icons";
 import CustomHeader from "../../components/atoms/CustomHeader";
 
+type NavParams = {
+  chatID: string | undefined;
+  isNew: boolean;
+  title: string;
+  sellerID: string;
+};
+
 const MessageChatScreen = () => {
   const route = useRoute();
-  const { chatID, isNew, title } = route.params;
-
-  console.log(auth.currentUser);
+  const { chatID, isNew, title, sellerID } = route.params as NavParams;
 
   const [messages, setMessages] = useState<IMessage[]>([]);
+
+  // Get all text messages
+  useEffect(() => {
+    if (!!chatID && !isNew)
+      (async () =>
+        setMessages(
+          (
+            await getDocs(
+              query(collection(db, `messages/${chatID}/chat`), limit(50))
+            )
+          ).docs.map((doc) => doc.data() as IMessage)
+        ))();
+  }, [chatID]);
 
   const onSend = useCallback(async (messages = []) => {
     setMessages((previousMessages) =>
@@ -34,11 +58,13 @@ const MessageChatScreen = () => {
     if (isNew) {
       const newChatDocRef = await addDoc(collection(db, "messages"), {
         title,
-        buyer: auth.currentUser?.uid,
-        seller: "sellerID", // TODO
+        buyer: [auth.currentUser?.uid],
+        seller: [sellerID],
       });
       newChatID = newChatDocRef.id;
     }
+    console.log("ChatID: ", newChatID);
+
     addDoc(collection(doc(collection(db, "messages"), newChatID), "chat"), {
       _id,
       createdAt,

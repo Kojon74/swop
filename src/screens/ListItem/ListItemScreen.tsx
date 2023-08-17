@@ -63,7 +63,12 @@ const ListItemScreen = (props: Props) => {
   const inputAccessoryViewID = "priceInput";
 
   const handleSubmit = async (values, resetForm, setErrors, setTouched) => {
-    const docID = (await addDoc(collection(db, "items"), values)).id;
+    const docID = (
+      await addDoc(collection(db, "items"), {
+        ...values,
+        sellerID: auth.currentUser?.uid,
+      })
+    ).id;
     updateDoc(doc(db, "users", auth.currentUser.uid), {
       userListedItems: arrayUnion(docID),
     });

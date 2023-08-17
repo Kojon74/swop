@@ -21,10 +21,11 @@ type ItemType = {
   images: string[];
   sellerID: string;
   datePosted: Date;
+  id: string;
 };
 
 type Props = {
-  items: string[];
+  items: string[] | undefined;
 };
 
 const ItemsGallery = ({ items }: Props) => {
@@ -41,7 +42,7 @@ const ItemsGallery = ({ items }: Props) => {
             await getDocs(
               query(collection(db, "items"), where(documentId(), "in", items))
             )
-          ).docs.map((doc) => doc.data() as ItemType)
+          ).docs.map((doc) => ({ ...doc.data(), id: doc.id } as ItemType))
         );
     })();
   }, [items]);
