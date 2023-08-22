@@ -8,7 +8,6 @@ type Props = {};
 
 const MessagesScreen = (props: Props) => {
   const { messageChats } = useGlobalContext();
-  console.log(messageChats);
 
   return (
     <SafeAreaView>

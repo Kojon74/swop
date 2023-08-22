@@ -14,9 +14,23 @@ const ActionBar = ({ price, title, itemID, sellerID }: Props) => {
   const { messageChats } = useGlobalContext();
 
   const handlePressChat = () => {
-    const isNew = !messageChats.includes(itemID);
-    navigation.navigate("MessageChat", { title, isNew, sellerID });
+    let chatID;
+    const isNew = !messageChats.some((messageChat) => {
+      if (messageChat.itemID === itemID) {
+        chatID = messageChat.id;
+        return true;
+      }
+      return false;
+    });
+    navigation.navigate("MessageChat", {
+      title,
+      isNew,
+      sellerID,
+      itemID,
+      chatID,
+    });
   };
+
   return (
     <View style={styles.container}>
       <CustomText style={[fonts.h1, styles.price]}>${price}</CustomText>

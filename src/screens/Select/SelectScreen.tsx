@@ -13,16 +13,19 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 type Props = {};
 
+type RouteParamTypes = {
+  list: any;
+  setItem: (e: string | React.ChangeEvent<any>) => void;
+};
+
 const SelectScreen = (props: Props) => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { list, setItem } = route.params;
-  const [data, setData] = useState(list);
+  const { list, setItem } = route.params as RouteParamTypes;
+  const [data, setData] = useState<any>(list);
 
   const handleSelectRow = (item: any) => {
-    console.log(data[item]);
-
-    if (data[item] !== "") setData((prev) => prev[item]);
+    if (data[item] !== "") setData((prev: any) => prev[item]);
     else {
       setItem(item);
       navigation.goBack();

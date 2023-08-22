@@ -40,10 +40,10 @@ const ItemDetailsScreen = () => {
       </TouchableOpacity>
       <Carousel data={imageURIs} liked={liked} setLiked={setLiked} />
       <View style={styles.descCont}>
-        <CustomText style={fonts.h1}>{title}</CustomText>
+        <CustomText style={fonts.h1}>{`${brand} | ${title}`}</CustomText>
         <CustomText>Size: {size}</CustomText>
+        <CustomText>{sellerUsername}</CustomText>
         <CustomText>{desc}</CustomText>
-        <CustomText>{sellerID}</CustomText>
       </View>
       <ActionBar price={price} title={title} itemID={id} sellerID={sellerID} />
     </SafeAreaView>

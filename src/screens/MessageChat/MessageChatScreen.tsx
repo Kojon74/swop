@@ -13,6 +13,7 @@ import {
   doc,
   getDocs,
   limit,
+  orderBy,
   query,
 } from "firebase/firestore";
 import { auth, db } from "../../utils/firebase";
@@ -26,52 +27,67 @@ type NavParams = {
   isNew: boolean;
   title: string;
   sellerID: string;
+  itemID: string;
 };
 
 const MessageChatScreen = () => {
   const route = useRoute();
-  const { chatID, isNew, title, sellerID } = route.params as NavParams;
+  const { chatID, title, sellerID, itemID } = route.params as NavParams;
 
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [curChatID, setCurChatID] = useState<string>(chatID ? chatID : "");
 
   // Get all text messages
   useEffect(() => {
-    if (!!chatID && !isNew)
+    if (!!chatID)
       (async () =>
         setMessages(
           (
             await getDocs(
-              query(collection(db, `messages/${chatID}/chat`), limit(50))
+              query(
+                collection(db, `messages/${chatID}/chat`),
+                orderBy("createdAt", "desc"),
+                limit(50)
+              )
             )
-          ).docs.map((doc) => doc.data() as IMessage)
+          ).docs.map(
+            (doc) =>
+              ({
+                ...doc.data(),
+                createdAt: doc.data().createdAt.toDate(),
+              } as IMessage)
+          )
         ))();
   }, [chatID]);
 
-  const onSend = useCallback(async (messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-    const { _id, createdAt, text, user } = messages[0];
-    let newChatID = chatID;
-    console.log(isNew);
+  const onSend = useCallback(
+    async (messages: IMessage[] = []) => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, messages)
+      );
+      const { _id, createdAt, text, user } = messages[0];
+      let newChatID = curChatID;
 
-    if (isNew) {
-      const newChatDocRef = await addDoc(collection(db, "messages"), {
-        title,
-        buyer: [auth.currentUser?.uid],
-        seller: [sellerID],
+      if (!!!curChatID) {
+        const newChatDocRef = await addDoc(collection(db, "messages"), {
+          title,
+          itemID,
+          buyer: [auth.currentUser?.uid],
+          seller: [sellerID],
+        });
+        setCurChatID(newChatDocRef.id);
+        newChatID = newChatDocRef.id;
+      }
+
+      addDoc(collection(doc(collection(db, "messages"), newChatID), "chat"), {
+        _id,
+        createdAt,
+        text,
+        user,
       });
-      newChatID = newChatDocRef.id;
-    }
-    console.log("ChatID: ", newChatID);
-
-    addDoc(collection(doc(collection(db, "messages"), newChatID), "chat"), {
-      _id,
-      createdAt,
-      text,
-      user,
-    });
-  }, []);
+    },
+    [curChatID]
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, marginHorizontal: 10 }}>
