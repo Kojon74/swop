@@ -23,7 +23,6 @@ import CustomButton, { ButtonType } from "../../components/atoms/CustomButton";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import {
-  addDoc,
   arrayUnion,
   collection,
   doc,
@@ -33,7 +32,8 @@ import {
 import { auth, db, storage } from "../../utils/firebase";
 import CategoriesList from "./CategoriesList";
 import { useGlobalContext } from "../../context/GlobalContext";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { manipulateAsync } from "expo-image-manipulator";
 
 type Props = {};
 
@@ -78,14 +78,15 @@ const ListItemScreen = (props: Props) => {
   ) => {
     const { images: localImageURIs, ...docValues } = values;
     const newItemRef = doc(collection(db, "items"));
+    const resizedImageURIs = await resizeImages(localImageURIs);
     // Get remote images in format [[uri1, path1], [uri2, path2], ...], need to transpose
     const remoteImages = await Promise.all(
-      localImageURIs.map(async (localImageURI) => {
+      resizedImageURIs.map(async (localImageURI) => {
         const remoteImagePath = `${auth.currentUser?.uid}/${
           newItemRef.id
         }/${localImageURI.split("/").slice(-1)}`;
         const storageRef = ref(storage, remoteImagePath);
-        await uploadBytes(
+        await uploadBytesResumable(
           storageRef,
           await (await fetch(localImageURI)).blob()
         );
@@ -115,6 +116,19 @@ const ListItemScreen = (props: Props) => {
     navigation.navigate("ProfileStackNav");
   };
 
+  // Resize imgURI into images with heights in array heights while preserving aspect ratio
+  const resizeImages = async (imageURIs: string[], height: number = 1000) =>
+    await Promise.all(
+      imageURIs.map(
+        async (imageURI) =>
+          (
+            await manipulateAsync(imageURI, [{ resize: { height } }], {
+              compress: 1,
+            })
+          ).uri
+      )
+    );
+
   const handleAddImg = (
     images: string[],
     setImages: (
@@ -140,10 +154,13 @@ const ListItemScreen = (props: Props) => {
               const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 quality: 1,
+                allowsMultipleSelection: true,
               });
-              if (result.canceled === false) {
-                setImages("images", [...images, result.uri]);
-              }
+              if (result.canceled === false)
+                setImages("images", [
+                  ...images,
+                  ...result.assets.map(({ uri }) => uri),
+                ]);
             } catch (error) {
               console.error(`${FILENAME}: ${error}`);
             }
@@ -212,8 +229,12 @@ const ListItemScreen = (props: Props) => {
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.itemImageGallery}>
-                    {values.images.map((imager) => (
-                      <Image source={{ uri: imager }} style={styles.image} />
+                    {values.images.map((image) => (
+                      <Image
+                        source={{ uri: image }}
+                        style={styles.image}
+                        key={image}
+                      />
                     ))}
                     <TouchableOpacity
                       style={[styles.image, styles.addPhotosButton]}
