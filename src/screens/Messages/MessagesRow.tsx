@@ -89,7 +89,21 @@ const MessagesRow = ({ messageChatDetails }: Props) => {
     <TouchableOpacity onPress={handleOnPress} style={styles.container}>
       <Image source={{ uri: itemPhotoURL }} style={styles.image} />
       <View style={{ flex: 1, alignSelf: "stretch" }}>
-        <Text style={[fonts.h6, styles.title]}>{`${brand} - ${title}`}</Text>
+        <View style={styles.firstRowText}>
+          <Text style={[fonts.h6, styles.title]}>{`${brand} - ${title}`}</Text>
+          <Text
+            style={[
+              fonts.p,
+              styles.transactionType,
+              {
+                backgroundColor:
+                  type === "trade" ? "blue" : type === "sell" ? "red" : "green",
+              },
+            ]}
+          >
+            {type}
+          </Text>
+        </View>
         <View style={styles.lastMessageCont}>
           <Text
             numberOfLines={1}
@@ -116,7 +130,19 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   image: { width: 50, height: 50, borderRadius: 5, marginRight: 10 },
+  firstRowText: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   title: { fontWeight: "500" },
+  transactionType: {
+    color: "white",
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    overflow: "hidden",
+  },
   lastMessageCont: { flexDirection: "row" },
   lastMessage: { color: colors.lightBlack },
   lastMessageText: { flex: 1 },

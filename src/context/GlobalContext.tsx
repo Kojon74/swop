@@ -93,7 +93,7 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
                 ...data,
                 id: messageChatDoc.id,
                 lastMessageTime: messageChatDoc.data().lastMessageTime.toDate(),
-                otherUser:
+                otherUserID:
                   type === "buy"
                     ? seller[0]
                     : type === "sell"
