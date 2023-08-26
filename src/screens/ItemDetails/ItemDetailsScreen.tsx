@@ -45,7 +45,14 @@ const ItemDetailsScreen = () => {
         <CustomText>{sellerUsername}</CustomText>
         <CustomText>{desc}</CustomText>
       </View>
-      <ActionBar price={price} title={title} itemID={id} sellerID={sellerID} />
+      <ActionBar
+        price={price}
+        brand={brand}
+        title={title}
+        itemID={id}
+        sellerID={sellerID}
+        itemPhotoURL={imageURIs[0]}
+      />
     </SafeAreaView>
   );
 };

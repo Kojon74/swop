@@ -7,9 +7,23 @@ import { fonts } from "../../utils/fonts";
 import { useNavigation } from "@react-navigation/native";
 import { useGlobalContext } from "../../context/GlobalContext";
 
-type Props = { price: number; title: string; itemID: string; sellerID: string };
+type Props = {
+  price: number;
+  brand: string;
+  title: string;
+  itemID: string;
+  sellerID: string;
+  itemPhotoURL: string;
+};
 
-const ActionBar = ({ price, title, itemID, sellerID }: Props) => {
+const ActionBar = ({
+  price,
+  brand,
+  title,
+  itemID,
+  sellerID,
+  itemPhotoURL,
+}: Props) => {
   const navigation = useNavigation<any>();
   const { messageChats } = useGlobalContext();
 
@@ -23,11 +37,13 @@ const ActionBar = ({ price, title, itemID, sellerID }: Props) => {
       return false;
     });
     navigation.navigate("MessageChat", {
+      brand,
       title,
       isNew,
-      sellerID,
+      otherUserID: sellerID,
       itemID,
       chatID,
+      itemPhotoURL,
     });
   };
 

@@ -25,14 +25,17 @@ import CustomHeader from "../../components/atoms/CustomHeader";
 type NavParams = {
   chatID: string | undefined;
   isNew: boolean;
+  brand: string;
   title: string;
-  sellerID: string;
+  otherUserID: string;
   itemID: string;
+  itemPhotoURL: string;
 };
 
 const MessageChatScreen = () => {
   const route = useRoute();
-  const { chatID, title, sellerID, itemID } = route.params as NavParams;
+  const { chatID, brand, title, otherUserID, itemID, itemPhotoURL } =
+    route.params as NavParams;
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [curChatID, setCurChatID] = useState<string>(chatID ? chatID : "");
@@ -70,10 +73,14 @@ const MessageChatScreen = () => {
 
       if (!!!curChatID) {
         const newChatDocRef = await addDoc(collection(db, "messages"), {
+          brand,
           title,
           itemID,
+          itemPhotoURL,
           buyer: [auth.currentUser?.uid],
-          seller: [sellerID],
+          seller: [otherUserID],
+          lastMessage: text,
+          lastMessageTime: createdAt,
         });
         setCurChatID(newChatDocRef.id);
         newChatID = newChatDocRef.id;
@@ -91,7 +98,7 @@ const MessageChatScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, marginHorizontal: 10 }}>
-      <CustomHeader text={title} />
+      <CustomHeader text={`${brand} | ${title}`} photoURL={itemPhotoURL} />
       <GiftedChat
         minComposerHeight={36}
         maxComposerHeight={100}

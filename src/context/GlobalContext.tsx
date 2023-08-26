@@ -18,6 +18,7 @@ import {
   getDoc,
   onSnapshot,
   or,
+  orderBy,
   query,
   where,
 } from "firebase/firestore";
@@ -73,26 +74,34 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
           or(
             where("buyer", "array-contains", auth.currentUser?.uid),
             where("seller", "array-contains", auth.currentUser?.uid)
-          )
+          ),
+          orderBy("lastMessageTime", "desc")
         );
         unsubscribe = onSnapshot(messageChatsQuery, (messageChatsQuerySnap) =>
           setMessageChats(
             messageChatsQuerySnap.docs.map((messageChatDoc) => {
               let type; // buy, sell, trade
+              const { buyer, seller, ...data } = messageChatDoc.data();
               if (
-                messageChatDoc.data().buyer.includes(auth.currentUser?.uid) &&
-                messageChatDoc.data().seller.includes(auth.currentUser?.uid)
+                buyer.includes(auth.currentUser?.uid) &&
+                seller.includes(auth.currentUser?.uid)
               )
                 type = "trade";
-              else if (
-                messageChatDoc.data().buyer.includes(auth.currentUser?.uid)
-              )
-                type = "buy";
+              else if (buyer.includes(auth.currentUser?.uid)) type = "buy";
               else type = "sell";
               return {
+                ...data,
                 id: messageChatDoc.id,
+                lastMessageTime: messageChatDoc.data().lastMessageTime.toDate(),
+                otherUser:
+                  type === "buy"
+                    ? seller[0]
+                    : type === "sell"
+                    ? buyer[0]
+                    : buyer[0] === auth.currentUser?.uid
+                    ? buyer[1]
+                    : buyer[0],
                 type,
-                ...messageChatDoc.data(),
               };
             })
           )

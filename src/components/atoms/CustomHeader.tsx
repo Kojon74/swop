@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import BackButton from "./BackButton";
 
 type Props = {
   text: string;
   subHeader?: string;
+  photoURL?: string;
   nav?: () => void;
   backDisabled?: boolean;
   icon?: JSX.Element;
@@ -13,16 +14,36 @@ type Props = {
 const CustomHeader = ({
   text,
   subHeader,
-  nav,
-  backDisabled = false,
+  photoURL,
   icon,
+  backDisabled = false,
+  nav,
 }: Props) => {
   return (
     <View style={styles.header}>
       {backDisabled ? (
         <View style={styles.emptyBackBtn} />
       ) : (
-        <BackButton backDisabled={backDisabled} nav={nav} />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <BackButton nav={nav} />
+          {photoURL && (
+            <Image
+              source={{ uri: photoURL }}
+              style={{
+                height: 35,
+                width: 35,
+                marginRight: 10,
+                borderRadius: 5,
+              }}
+            />
+          )}
+        </View>
       )}
       <View style={styles.textCont}>
         <Text style={styles.headerTxt}>{text}</Text>
