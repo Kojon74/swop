@@ -33,6 +33,7 @@ const DiscoverScreen = (props: Props) => {
                 limit(10)
               )
             : query(collection(db, "items"), limit(10));
+        // Don't sort items here since we still need to query data later which will jumble ordering
         setDiscoverItems(
           (await getDocs(discoverQuery)).docs.map((doc) => doc.id)
         );

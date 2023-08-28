@@ -9,6 +9,7 @@ import {
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { ItemType } from "./ItemsGallery";
+import { fonts } from "../../utils/fonts";
 
 type Props = {
   item: ItemType;
@@ -40,11 +41,11 @@ const GalleryItem = ({ item }: Props) => {
     >
       <Image source={{ uri: imageURIs[0] }} style={styles.image} />
       <View style={styles.desc}>
+        <Text style={fonts.h6}>{`${brand} - ${title}`}</Text>
         <View style={styles.firstRowDesc}>
-          <Text>${price}</Text>
-          <Text>{size}</Text>
+          <Text style={fonts.p}>${price}</Text>
+          <Text style={fonts.p}>{size}</Text>
         </View>
-        <Text>{title}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -58,6 +59,6 @@ const styles = StyleSheet.create({
     width: Math.floor(WINDOW_WIDTH / 2),
     height: Math.floor(WINDOW_WIDTH / 2),
   },
-  desc: { padding: 5 },
+  desc: { paddingHorizontal: 5 },
   firstRowDesc: { flexDirection: "row", justifyContent: "space-between" },
 });

@@ -45,7 +45,12 @@ const ItemsGallery = ({ items }: Props) => {
             await getDocs(
               query(collection(db, "items"), where(documentId(), "in", items))
             )
-          ).docs.map((doc) => ({ ...doc.data(), id: doc.id } as ItemType))
+          ).docs
+            .sort(
+              (a, b) =>
+                b.data().datePosted.toDate() - a.data().datePosted.toDate()
+            )
+            .map((doc) => ({ ...doc.data(), id: doc.id } as ItemType))
         );
     })();
   }, [items]);
